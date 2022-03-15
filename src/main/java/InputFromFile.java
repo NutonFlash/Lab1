@@ -62,7 +62,7 @@ public class InputFromFile {
             }
             if (numberOfUnknowns > numberOfEquations)
                 throw new InconsistentMatrixException();
-            double[][] coefficientsForUnknowns = new double[numberOfEquations][numberOfUnknowns];
+            double[][] coefficientsOfUnknowns = new double[numberOfEquations][numberOfUnknowns];
             double[] freeCoefficients = new double[numberOfEquations];
             for (int i = 0; i < numberOfEquations; ++i) {
                 String matrixLine = bufferedReader.readLine();
@@ -72,12 +72,8 @@ public class InputFromFile {
                     matrixLine = matrixLine.trim() + " ";
                     if (matrixLine.matches(expression)) {
                         strMatrixRow = matrixLine.split(" ", numberOfUnknowns + 1);
-                        if (Double.parseDouble(strMatrixRow[i])==0) {
-                            System.out.println("Ведущий элемент матрицы равен нулю, поэтому неизвестные коэффициенты не могут быть рассчитаны методом Гаусса.");
-                            throw new NumberFormatException();
-                        }
                         for (int j = 0; j < strMatrixRow.length - 1; ++j) {
-                            coefficientsForUnknowns[i][j] = Double.parseDouble(strMatrixRow[j]);
+                            coefficientsOfUnknowns[i][j] = Double.parseDouble(strMatrixRow[j]);
                         }
                         freeCoefficients[i] = Double.parseDouble(strMatrixRow[numberOfUnknowns]);
                     } else {
@@ -89,7 +85,17 @@ public class InputFromFile {
                     throw new IOException();
                 }
             }
-            return new Matrix(coefficientsForUnknowns, freeCoefficients, numberOfEquations, numberOfUnknowns);
+            Matrix matrix = new Matrix(coefficientsOfUnknowns, freeCoefficients, numberOfEquations, numberOfUnknowns);
+            MatrixUtils matrixUtils = new MatrixUtils();
+            for (int i=0; i<matrix.getNumberOfEquations() ; ++i) {
+                if (matrix.getCoefficientsOfUnknowns()[i][i] == 0) {
+                    if(!matrixUtils.replaceMatrixLine(matrix,i) && !matrixUtils.replaceMatrixColumn(matrix,i)) {
+                        System.out.println("Ведущий элемент "+(i+1)+" строки равняется нулю.\nНе удалось найти корректную перестановку, поэтому СЛАУ не сможет быть решено методом Гаусса.");
+                        throw new NumberFormatException();
+                    }
+                }
+            }
+            return matrix;
         }
         return null;
     }

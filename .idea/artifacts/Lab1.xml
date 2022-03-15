@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact name="Lab1">
+    <output-path>$PROJECT_DIR$/out/artifacts/Lab1</output-path>
+    <root id="root">
+      <element id="archive" name="Lab1.zip" />
+    </root>
+  </artifact>
+</component>

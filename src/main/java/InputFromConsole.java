@@ -1,6 +1,9 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 
 public class InputFromConsole {
 
@@ -27,13 +30,7 @@ public class InputFromConsole {
                         if (strMatrixCoefficient != null) {
                             coefficientValidation = validateMatrixCoefficient(strMatrixCoefficient);
                             if (coefficientValidation) {
-                                if (i != j) coefficientsOfUnknowns[i][j] = Double.parseDouble(strMatrixCoefficient);
-                                else {
-                                    if (Double.parseDouble(strMatrixCoefficient) == 0) {
-                                        System.out.println("Ведущий элемент матрицы равен нулю, поэтому неизвестные коэффициенты не могут быть рассчитаны методом Гаусса.");
-                                        throw new NumberFormatException();
-                                    } else coefficientsOfUnknowns[i][j] = Double.parseDouble(strMatrixCoefficient);
-                                }
+                                coefficientsOfUnknowns[i][j] = Double.parseDouble(strMatrixCoefficient);
                             }
                         } else throw new IOException();
                     }
@@ -41,7 +38,7 @@ public class InputFromConsole {
                 System.out.println("Введите свободный член уравнения "+(i+1)+":");
                 boolean freeCoefficientValidation = false;
                 while (!freeCoefficientValidation) {
-                    System.out.print("---");
+                    System.out.print(">>>");
                     String strFreeCoefficient = bufferedReader.readLine();
                     if (strFreeCoefficient != null) {
                         freeCoefficientValidation = validateMatrixCoefficient(strFreeCoefficient);
@@ -55,7 +52,17 @@ public class InputFromConsole {
             System.out.println("Ошибка чтения из консоли.");
             System.exit(1);
         }
-        return new Matrix(coefficientsOfUnknowns, freeCoefficients, numberOfEquations, numberOfUnknowns);
+        Matrix matrix = new Matrix(coefficientsOfUnknowns, freeCoefficients, numberOfEquations, numberOfUnknowns);
+        MatrixUtils matrixUtils = new MatrixUtils();
+        for (int i=0; i<matrix.getNumberOfEquations() ; ++i) {
+            if (matrix.getCoefficientsOfUnknowns()[i][i] == 0) {
+                if(!matrixUtils.replaceMatrixLine(matrix,i) && !matrixUtils.replaceMatrixColumn(matrix,i)) {
+                    System.out.println("Ведущий элемент "+(i+1)+" строки равняется нулю.\nНе удалось найти корректную перестановку, поэтому СЛАУ не сможет быть решено методом Гаусса.");
+                    throw new NumberFormatException();
+                }
+            }
+        }
+        return matrix;
     }
     //получить количество уравнений СЛАУ
     public int getNumberOfMatrixEquations() {
